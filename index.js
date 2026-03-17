@@ -12,6 +12,7 @@ app.get('/', (req, res) => {
 app.post('/generate-pdf', async (req, res) => {
   const { html } = req.body;
 
+  console.log('Request received');
   console.log('HTML length:', html?.length);
 
   if (!html) {
@@ -26,28 +27,42 @@ app.post('/generate-pdf', async (req, res) => {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
+    console.log('Browser launched');
+
     const page = await browser.newPage();
 
     await page.setContent(html, {
-      waitUntil: 'domcontentloaded'
+      waitUntil: 'networkidle0'
     });
+
+    console.log('Content loaded');
+
+    await page.emulateMediaType('screen');
 
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true
     });
 
-    res.setHeader('Content-Type', 'application/pdf');
+    console.log('PDF generated, size:', pdf.length);
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Length', pdf.length);
+    res.setHeader('Content-Disposition', 'attachment; filename="generated.pdf"');
+
     res.end(pdf);
 
   } catch (err) {
     console.error('PDF ERROR:', err);
     res.status(500).send(err.message);
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+      await browser.close();
+      console.log('Browser closed');
+    }
   }
 });
 
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 3000, () => {
+  console.log('Server running');
+});

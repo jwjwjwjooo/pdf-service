@@ -4,11 +4,10 @@
   "description": "HTML to PDF with Puppeteer",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "postinstall": "PUPPETEER_SKIP_DOWNLOAD=false npx puppeteer browsers install chrome"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.21.2",
-    "puppeteer": "^24.39.1"
+    "puppeteer-core": "^24.39.1"
   }
 }

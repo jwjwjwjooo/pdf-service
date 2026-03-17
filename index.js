@@ -1,5 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 const app = express();
 
@@ -20,7 +20,6 @@ app.post('/generate-pdf', async (req, res) => {
 
   try {
     browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium',
       headless: true,
       args: [
         '--no-sandbox',

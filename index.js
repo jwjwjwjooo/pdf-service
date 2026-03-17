@@ -1,29 +1,36 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 const app = express();
 
 app.use(express.json({ limit: '20mb' }));
 
+app.get('/', (req, res) => {
+  res.send('PDF service is working');
+});
+
 app.post('/generate-pdf', async (req, res) => {
   const { html } = req.body;
+
+  console.log('HTML length:', html?.length);
+
+  if (!html) {
+    return res.status(400).send('Brak HTML');
+  }
 
   let browser;
 
   try {
     browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ]
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
 
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, {
+      waitUntil: 'domcontentloaded'
+    });
 
     const pdf = await page.pdf({
       format: 'A4',
@@ -33,9 +40,9 @@ app.post('/generate-pdf', async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.send(pdf);
 
-  } catch (e) {
-    console.error(e);
-    res.status(500).send('PDF error');
+  } catch (err) {
+    console.error('PDF ERROR:', err);
+    res.status(500).send(err.message);
   } finally {
     if (browser) await browser.close();
   }

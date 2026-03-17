@@ -38,7 +38,9 @@ app.post('/generate-pdf', async (req, res) => {
     });
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.send(pdf);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdf.length);
+    res.end(pdf);
 
   } catch (err) {
     console.error('PDF ERROR:', err);
